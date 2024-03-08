@@ -1,1 +1,0 @@
-# DBirtell_INF653_QUOTESDB
