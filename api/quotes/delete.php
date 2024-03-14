@@ -1,11 +1,5 @@
 <?php
 
-//Headers
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: DELETE');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
@@ -23,14 +17,15 @@ $data = json_decode(file_get_contents("php://input"));
 //Set ID to update
 $quote->id = $data->id;
 
-//delete post
 
+  //delete post
 if($quote->delete()){
-  echo json_encode(
-    array('message' => 'Quote deleted')
+   echo json_encode(
+    ['id' => $quote->id]
   );
 }else{
-  echo json_encode(
-    array('message'=> 'No Quotes Found')
-  );
-}
+     echo json_encode(
+      ['message' => 'No Quotes Found']
+    );
+  }
+
