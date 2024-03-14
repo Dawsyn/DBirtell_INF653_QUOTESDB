@@ -38,11 +38,9 @@ $author->author = $data->author;
 //update post
 
 if($author->update()){
-  echo json_encode(
-    array('message' => 'Author Updated')
-  );
+  echo json_encode(['id' => $author->id, 'author' => $author->author]);
 }else{
   echo json_encode(
-    array('message'=> 'author_id not Updated')
+    ['message' => 'author_id Not Updated']
   );
 }
