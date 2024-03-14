@@ -7,6 +7,7 @@
     //Post properties
     public $id;
     public $author;
+    
 
     //Constructor
     public function __construct($db) {
@@ -52,8 +53,14 @@
     $row = $stmt ->fetch(PDO::FETCH_ASSOC);
 
     //Set properties
-    $this->id = $row['id'];
-    $this->author = $row['author'];
+      if($row){
+        $this->id = $row['id'];
+        $this->author = $row['author'];
+      }else{
+        $this->id = null;
+        $this->author = null;
+      }
+    
     }
 
     public function update() {
@@ -92,9 +99,9 @@
     public function create() {
       // Create query
       $query = 'INSERT INTO ' . $this->table . '
-       (author, id) 
+       (author) 
        VALUES 
-       (:author, :id)';
+       (:author)';
 
 
       // Prepare statement
@@ -102,21 +109,20 @@
 
       // Clean data
       $this->author = htmlspecialchars(strip_tags($this->author));
-      $this->id = htmlspecialchars(strip_tags($this->id));
+      //$this->id = htmlspecialchars(strip_tags($this->id));
 
       // Bind data
       $stmt->bindParam(':author', $this->author);
-      $stmt->bindParam(':id', $this->id);
+      //$stmt->bindParam(':id', $this->id);
       
       // Execute query
       if($stmt->execute()) {
-        return true;
-  }
-
-  // Print error if something goes wrong
-  printf("Error: %s.\n", $stmt->error);
-
-  return false;
+          // Retrieve and set the ID of the newly created quote
+          $this->id = $this->conn->lastInsertId();
+          return true;
+      } else {
+          return false;
+      }
   }
 
   //Delete post 
