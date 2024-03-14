@@ -19,16 +19,20 @@ $author->id = isset($_GET['id']) ? $_GET['id'] : die();
 $author->read_single();
 
 //create array
-$authors_arr = array(
+if(isset($author->author)){
+  $author_arr = array(
     'id' => $author->id,
     'author' => $author->author
-  
   );
-  
-  //make JSON
-  print_r(json_encode($authors_arr));
 
-  if($author->id===null){
-    echo json_encode(
-      array('message' => 'author_id Not found'));
-  }
+  //turn to JSON & output
+  echo json_encode($author_arr);
+}else{
+  echo json_encode(
+  ['message' => 'author_id Not Found']);
+}
+
+
+ 
+    
+
