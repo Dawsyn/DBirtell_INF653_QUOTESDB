@@ -17,19 +17,21 @@ $singleQuote->id = isset($_GET['id']) ? $_GET['id'] : die();
 //get post 
 $singleQuote->read_single();
 
-//create array
-$quotes_arr = array(
-    'id' => $singleQuote->id,
-    'quote' => $singleQuote->quote,
-    'category_id' => $singleQuote->category_id,
-    'author_id' => $singleQuote->author_id
-  
-  );
-  
-  //make JSON
-  print_r(json_encode($quotes_arr));
+if(isset($singleQuote->quote)){
+  //create array
+  $quotes_arr = array(
+    'id' => $singleQuote -> id, 
+    'quote' => $singleQuote -> quote,
+    'author' => $singleQuote -> author,
+    'category' => $singleQuote -> category);
 
-  if($singleQuote->id===null){
+    //make JSON
+    print_r(json_encode($quotes_arr));
+}else{
     echo json_encode(
-      array('message' => 'No Quotes Found'));
+      ['message' => 'No Quotes Found']);
   }
+
+
+
+
