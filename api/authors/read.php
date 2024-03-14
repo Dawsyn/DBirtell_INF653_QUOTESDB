@@ -1,5 +1,6 @@
 <?php
 
+//Headers
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Author.php';
@@ -20,7 +21,6 @@ $num = $result->rowCount();
 if($num > 0){
   //Post array
   $authors_arr = array();
-  $authors_arr ['data'] = array();
 
   while($row = $result->fetch(PDO::FETCH_ASSOC)){
     extract($row);
@@ -30,13 +30,14 @@ if($num > 0){
     'author' => $author);
 
     //Push to 'data'
-    array_push($authors_arr['data'], $author_item);
-
-    //Turn to JSON & Output
-    echo json_encode($authors_arr);
+    array_push($authors_arr, $author_item);
   } 
+
+  //Turn to JSON & Output
+  echo json_encode($authors_arr);
 
 } else {
   echo json_encode(
-    array('message' => 'author_id Not found'));
+  ['message' => 'author_id Not Found']);
+   
 }
