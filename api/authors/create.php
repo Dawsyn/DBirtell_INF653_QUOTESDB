@@ -1,10 +1,5 @@
 <?php
 
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Author.php';
@@ -35,17 +30,13 @@ if (!empty($missingParams)) {
 }
 
 $author->author = $data->author;
-$author->id = $data->id;
+//$author->id = $data->id;
 
 
 //create post
 
 if($author->create()){
-  echo json_encode(
-    array('message' => 'Author Created')
-  );
+  echo json_encode(['id' => $author->id, 'author' => $author->author]);
 }else{
-  echo json_encode(
-    array('message'=> 'author_id Not Found')
-  );
+  echo json_encode(['message' => 'author_id Not Found']);
 }
