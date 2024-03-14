@@ -20,15 +20,22 @@ $category->id = isset($_GET['id']) ? $_GET['id'] : die();
 $category->read_single();
 
 //create array
-$categories_arr = array(
+if(isset($category->category)){
+  $categories_arr = array(
     'id' => $category->id,
     'category' => $category->category
   );
-  
-  //make JSON
-  print_r(json_encode($categories_arr));
 
- if($category->id===null){
-    echo json_encode(
-      array('message' => 'category_id Not found'));
-  }
+  //make JSON
+   print_r(json_encode($categories_arr));
+}else{
+  echo json_encode(
+  ['message' => 'category_id Not Found']);
+}
+
+  
+  
+ 
+
+    
+  
