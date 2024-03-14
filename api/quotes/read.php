@@ -1,5 +1,6 @@
 <?php
 
+//Headers
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
@@ -11,8 +12,17 @@ $db = $database->connect();
 //Instantiate blog post object
 $post = new Quote($db);
 
+// Check if author_id is provided in the query string
+$author_id = isset($_GET['author_id']) ? $_GET['author_id'] : null;
+
+// Use the modified read method, possibly with the author_id
+$result = $post->read($author_id);
+
+
 //Blog post query
-$result = $post->read();
+//$result = $post->read();
+
+
 //Get row count
 $num = $result->rowCount();
 
@@ -20,25 +30,23 @@ $num = $result->rowCount();
 if($num > 0){
   //Post array
   $posts_arr = array();
-  $posts_arr ['data'] = array();
 
   while($row = $result->fetch(PDO::FETCH_ASSOC)){
     extract($row);
 
     $post_item = array(
     'id' => $id, 
-    'author_id' => $author_id,
     'quote' => $quote,
-    'category_id' =>$category_id);
+    'author' => $author_name,
+    'category' => $category_name);
 
     //Push to 'data'
-    array_push($posts_arr['data'], $post_item);
-
-    //Turn to JSON & Output
-    echo json_encode($posts_arr);
+    array_push($posts_arr, $post_item);
   } 
 
+  //Turn to JSON & Output
+  echo json_encode($posts_arr);
+
 } else {
-  echo json_encode(
-    array('message' => 'No Quotes Found'));
+  echo json_encode(['message' => 'No Quotes Found']);
 }
