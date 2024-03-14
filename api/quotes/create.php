@@ -1,10 +1,5 @@
 <?php
 
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
@@ -24,18 +19,24 @@ $missingParams = [];
 if (empty($data->quote)) {
     $missingParams[] = 'quote';
 }
-if (empty($data->author_id)) {
+
+if (!isset($data->author_id) || empty($data->author_id)) {
     $missingParams[] = 'author_id';
-}
-if (empty($data->category_id)) {
-    $missingParams[] = 'category_id';
+} else if (!$quote->authorExists($data->author_id)) {
+    echo json_encode(['message' => 'author_id Not Found']);
+    return;
 }
 
-// If there are missing parameters, respond with an error
+if (!isset($data->category_id) || empty($data->category_id)) {
+    $missingParams[] = 'category_id';
+} else if (!$quote->categoryExists($data->category_id)) {
+    echo json_encode(['message' => 'category_id Not Found']);
+    return;
+}
+
 if (!empty($missingParams)) {
     echo json_encode([
-        'message' => 'Missing Required Parameters',
-        'missing' => $missingParams
+        'message' => 'Missing Required Parameters'
     ]);
     return;
 }
@@ -47,11 +48,7 @@ $quote->category_id = $data->category_id;
 //create post
 
 if($quote->create()){
-  echo json_encode(
-    array('message' => 'Post Created')
-  );
+echo json_encode(['id' => $quote->id, 'quote' => $quote->quote, 'author_id' => $quote->author_id, 'category_id' => $quote->category_id]);
 }else{
-  echo json_encode(
-    array('message'=> 'post_id Not Found')
-  );
+  echo json_encode(['message' => $missingParams . ' Not Found']);
 }
