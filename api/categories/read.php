@@ -2,7 +2,6 @@
 
 //Headers
 include_once 'index.php';
-
 include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
@@ -22,7 +21,6 @@ $num = $result->rowCount();
 if($num > 0){
   //Post array
   $categories_arr = array();
-  $categories_arr ['data'] = array();
 
   while($row = $result->fetch(PDO::FETCH_ASSOC)){
     extract($row);
@@ -32,13 +30,12 @@ if($num > 0){
     'category' => $category);
 
     //Push to 'data'
-    array_push($categories_arr['data'], $category_item);
-
-    //Turn to JSON & Output
-    echo json_encode($categories_arr);
+    array_push($categories_arr, $category_item);
   } 
 
+  //Turn to JSON & Output
+  echo json_encode($categories_arr);
+
 } else {
-  echo json_encode(
-    array('message' => 'category_id Not found'));
+  echo json_encode(['message' => 'category_id Not Found']);
 }
