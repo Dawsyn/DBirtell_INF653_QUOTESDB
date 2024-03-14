@@ -1,10 +1,5 @@
 <?php
 
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Category.php';
@@ -20,7 +15,7 @@ $category = new Category($db);
 $data = json_decode(file_get_contents("php://input"));
 
 // Validate the presence of required parameters
-$missingParams = [];
+
 if (empty($data->category)) {
     $missingParams[] = 'category';
 }
@@ -34,18 +29,15 @@ if (!empty($missingParams)) {
     return;
 }
 
+
+
 $category->category = $data->category;
-$category->id = $data->id;
+//$category->id = $data->id;
 
 
 //create post
 if($category->create()){
-  echo json_encode(
-    array('message' => 'Category Created')
-  );
+  echo json_encode(['id' => $category->id, 'category' => $category->category]);
 }else{
-  echo json_encode(
-    array('message'=> 'category_id Not Found')
-  );
+  echo json_encode(['message' => 'category_id Not Found']);
 }
-//add
