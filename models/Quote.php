@@ -6,6 +6,10 @@
 
     //Post properties
     public $id;
+    public $category;
+    public $quote;
+    public $author;
+    public $author_id;
     public $category_id;
 
     //Constructor
@@ -14,35 +18,46 @@
     }
 
     //Get posts
-    public function read() {
+    public function read($author_id = null) {
       //Create query
-      $query = 'SELECT 
-          id,
-          quote,
-          author_id,
-          category_id
-        FROM
-        ' . $this ->table ;
-
+      $query = 'SELECT
+      q.id,
+      q.quote,
+      a.author AS author_name,
+      c.category AS category_name 
+      FROM
+      quotes q
+      LEFT JOIN authors a ON q.author_id = a.id
+      LEFT JOIN categories c ON q.category_id = c.id';
           
-      //Prepare
-      $stmt = $this -> conn -> prepare($query);
-      //Execute
-      $stmt -> execute();
+      // If an author_id is provided, add a WHERE clause to filter by author_id
+      if ($author_id !== null) {
+          $query .= ' WHERE q.author_id = :author_id';
+      }
 
+      $stmt = $this->conn->prepare($query);
+
+      // If an author_id is provided, bind it to the query
+      if ($author_id !== null) {
+          $stmt->bindParam(':author_id', $author_id, PDO::PARAM_INT);
+      }
+
+      $stmt->execute();
       return $stmt;
     }
 
     //Get single post
     public function read_single(){
-      $query = 'SELECT 
-          id,
-          quote,
-          author_id,
-          category_id
+      $query = 'SELECT
+        q.id,
+        q.quote,
+        a.author AS author_name,
+        c.category AS category_name 
         FROM
-        ' . $this ->table . '
-        WHERE id = ?
+        quotes q
+        LEFT JOIN authors a ON q.author_id = a.id
+        LEFT JOIN categories c ON q.category_id = c.id
+        WHERE q.id = ?
     LIMIT 1';
 
      //Prepare
@@ -56,19 +71,36 @@
     $row = $stmt ->fetch(PDO::FETCH_ASSOC);
 
     //Set properties
-    $this->id = $row['id'];
-    $this->quote = $row['quote'];
-    $this->category_id = $row['category_id'];
-    $this->author_id = $row['author_id'];
-
+      if($row){
+        $this->id = $row['id'];
+        $this->quote = $row['quote'];
+        $this->author = $row['author_name'];
+        $this->category = $row['category_name'];
+      }else{
+      // If no row is returned, explicitly set properties to indicate no data found
+      $this->id = null;
+      $this->quote = null;
+      $this->author = null;
+      $this->category = null;
+      }
     }
 
     public function update() {
+
+      $checkQuery = "SELECT COUNT(*) FROM " . $this->table . " WHERE id = :id";
+      $checkStmt = $this->conn->prepare($checkQuery);
+      $checkStmt->bindParam(':id', $this->id);
+      $checkStmt->execute();
+
+      // If no quotes found with the provided ID, return false immediately
+      if ($checkStmt->fetchColumn() == 0) {
+          return false;
+      }
+      
       // update query
       $query = 'UPDATE ' . 
           $this->table . ' 
       SET 
-        id = :id, 
         quote = :quote, 
         author_id = :author_id,
         category_id = :category_id
@@ -79,26 +111,24 @@
       $stmt = $this->conn->prepare($query);
 
       // Clean data
+      $this->id = htmlspecialchars(strip_tags($this->id));
       $this->quote = htmlspecialchars(strip_tags($this->quote));
       $this->author_id = htmlspecialchars(strip_tags($this->author_id));
       $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-      $this->id = htmlspecialchars(strip_tags($this->id));
+      
 
       // Bind data
+      $stmt->bindParam(':id', $this->id);
       $stmt->bindParam(':quote', $this->quote);
       $stmt->bindParam(':author_id', $this->author_id);
       $stmt->bindParam(':category_id', $this->category_id);
-      $stmt->bindParam(':id', $this->id);
 
-      // Execute query
+      //Execute statment
       if($stmt->execute()) {
-        return true;
-  }
-
-  // Print error if something goes wrong
-  printf("Error: %s.\n", $stmt->error);
-
-  return false;
+          return true;
+      } else {
+          return false;
+      }
 }
 
     // Create Post
@@ -125,14 +155,16 @@
 
       // Execute query
       if($stmt->execute()) {
-        return true;
+          // Retrieve and set the ID of the newly created quote
+          $this->id = $this->conn->lastInsertId();
+          return true;
+      } else {
+          return false;
+      }
   }
 
-  // Print error if something goes wrong
-  printf("Error: %s.\n", $stmt->error);
 
-  return false;
-  }
+    
 
   //Delete post 
   public function delete(){
@@ -149,13 +181,30 @@
     $stmt->bindParam(':id', $this->id);
 
     if($stmt->execute()) {
-      return true;
+      if($stmt->rowCount() > 0){
+        return true;
+      }
     }
-
-    // Print error if something goes wrong
-    printf("Error: %s.\n", $stmt->error);
 
     return false;
         
   }
+
+    //Check if Author exsists
+    public function authorExists($author_id) {
+        $query = "SELECT COUNT(*) FROM authors WHERE id = :author_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':author_id', $author_id);
+        $stmt->execute();
+        return $stmt->fetchColumn() > 0;
+    }
+
+    // Check if category exists
+    public function categoryExists($category_id) {
+        $query = "SELECT COUNT(*) FROM categories WHERE id = :category_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':category_id', $category_id);
+        $stmt->execute();
+        return $stmt->fetchColumn() > 0;
+    }  
 }
