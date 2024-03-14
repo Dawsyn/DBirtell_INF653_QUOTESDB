@@ -1,11 +1,6 @@
 <?php
 
 //Headers
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
 include_once 'index.php';
 include_once '../../config/Database.php';
 include_once '../../models/Category.php';
@@ -42,11 +37,9 @@ $category->category = $data->category;
 //update post
 
 if($category->update()){
-  echo json_encode(
-    array('message' => 'Category Updated')
-  );
+   echo json_encode(['id' => $category->id, 'category' => $category->category]);
 }else{
   echo json_encode(
-    array('message'=> 'Category Not Updated')
+    ['message' => 'Category Not Updated']
   );
 }
